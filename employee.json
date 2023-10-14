@@ -1,0 +1,34 @@
+{
+ "employee_data": [
+  {
+    "emp_id": "emp-01",
+    "age": 26,
+    "Name": "James"
+  },
+  {
+    "emp_id": "emp-02",
+    "age": 29,
+    "Name": "Max"
+  },
+  {
+    "emp_id": "emp-03",
+    "age": 33,
+    "Name": "Claire"
+  },
+  {
+    "emp_id": "emp-04",
+    "age": 34,
+    "Name": "Julia"
+  },
+  {
+    "emp_id": "emp-05",
+    "age": 22,
+    "Name": "Jon"
+  },
+  {
+    "emp_id": "emp-06",
+    "age": 39,
+    "Name": "Vicky"
+  }
+]
+}
