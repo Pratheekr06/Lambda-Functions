@@ -1,5 +1,6 @@
 import json
 import boto3
+import datetime
 
 s3_client = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
@@ -19,46 +20,30 @@ table_create_params = {
       'WriteCapacityUnits': 2
   }
 }
-params = {
-  **table_create_params,
-  'KeySchema': [
-      *table_create_params['KeySchema'],
-      {'AttributeName': 'image_path', 'KeyType': 'HASH'}
-    ],
-  'AttributeDefinitions': [
-     *table_create_params['AttributeDefinitions'],
-      {'AttributeName': 'image_path', 'AttributeType': 'S'}
-    ],
-}
+
 def lambda_handler(event, context):
-  bucket = event['Records'][0]['s3']['bucket']['name']
-  bucket_obj = event['Records'][0]['s3']['object']
-  tables = [table for table in dynamodb.meta.client.list_tables()['TableNames']]
   try:
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    bucket_obj = event['Records'][0]['s3']['object']
+    tables = [table for table in dynamodb.meta.client.list_tables()['TableNames']]
+    image_uploaded_ts = datetime.datetime.now()
     if tables.count(table_name) >= 1:
       print('exists')
       image_info = {
         "image_name": bucket_obj['key'],
         "image_size": bucket_obj['size'],
-        "image_path": f"s3://{bucket}/{bucket_obj['key']}"
+        "image_path": f"s3://{bucket}/{bucket_obj['key']}",
+        "image_uploaded_ts": str(image_uploaded_ts)
       }
       dynamodb.meta.client.put_item(TableName=table_name, Item=image_info)
     else:
-      image_data = {
-        "image_name": bucket_obj['key'],
-        "image_size": bucket_obj['size'],
-      }
       table = dynamodb.create_table(**table_create_params)
       print('created')
       table.wait_until_exists()
-      print('waited')
-      table.put_item(Item=image_data)
     return {
       'statusCode': 200,
       'body': json.dumps('Image info successfully added')
     }
   except Exception as err:
-    return {
-      'statusCode': 400,
-      'body': json.dumps(err)
-    }
+    print(err)
+    return err
